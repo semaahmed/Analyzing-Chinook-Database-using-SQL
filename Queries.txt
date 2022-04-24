@@ -1,0 +1,83 @@
+/* Query1 - Which composer has the most number of albums? */
+
+SELECT a.Title album,
+       t.Composer composer,
+       Count(*) total
+FROM Genre g
+JOIN Track t ON g.GenreId = t.GenreId
+JOIN Album a ON a.AlbumId = t.AlbumId
+WHERE t.Composer Not LIKE ' '
+GROUP BY album,
+         composer
+ORDER BY total DESC
+LIMIT 10;
+
+/* Query2 - Which Employee has the most sales? */  
+
+SELECT e.firstname|| ' ' ||e.lastname fullname,
+       ROUND(sum(i.Total)) total_sales
+FROM Customer c
+JOIN Employee e ON e.EmployeeId = c.SupportRepId
+JOIN Invoice i ON i.CustomerId = c.CustomerId
+GROUP BY fullname
+ORDER BY total_sales;
+
+/* Query3 - What are the top 10 artists have the highest number of tracks? */  
+
+SELECT ar.Name name,
+       Count(t.TrackId) AS total
+FROM Track t
+JOIN Genre g ON g.GenreId = t.GenreId
+JOIN Album a ON a.AlbumId = t.AlbumId
+JOIN ARTIST ar ON ar.ARTISTID = a.ARTISTID
+GROUP BY name
+ORDER BY total DESC
+LIMIT 10;
+
+/* Query4 - What are the top 5 genres in the Germany? */  
+
+SELECT g.name genre,
+Count(t.TrackId) total
+FROM Track t
+JOIN Genre g ON t.GenreId = g.GenreId
+JOIN InvoiceLine il ON t.TrackId = il.TrackId
+JOIN Invoice i ON il.InvoiceId = i.InvoiceId
+WHERE i.BillingCountry ="Germany"
+GROUP BY genre
+ORDER BY total DESC
+LIMIT 5;
+
+/* Query5 - Which mediatype has the most tracks ?  */ 
+
+SELECT m.Name media,
+       Count(*) total
+FROM Track t
+JOIN Genre g ON g.GenreId = t.GenreId
+JOIN MediaType m ON m.MediaTypeId = t.MediaTypeId
+JOIN Album a ON a.AlbumId = t.AlbumId
+JOIN ARTIST ar ON ar.ARTISTID = a.ARTISTID
+GROUP BY media
+ORDER BY total DESC;
+
+/* Query6 - What is the total invoice quantities for each year and customer ? */ 
+
+SELECT c.FirstName|| ' '||c.LastName fullname,
+       STRFTIME('%Y', i.InvoiceDate) YEAR,
+                                     SUM(il.Quantity) total
+FROM Customer c
+JOIN Invoice i ON c.CustomerId = i.CustomerId
+JOIN InvoiceLine il ON i.InvoiceId = il.InvoiceId
+GROUP BY YEAR
+ORDER BY total DESC;
+
+
+/* Query7 - What is the total number of albums and the average number of tracks per album for every artist? */ 
+
+SELECT ar.Name artist,
+       COUNT(Distinct(a.AlbumId)) AS albums,
+       (COUNT(t.TrackId) / COUNT(Distinct(a.AlbumId)))*0.1 AS avg_number
+FROM Artist ar
+JOIN Album a ON ar.ArtistId = a.ArtistId
+JOIN Track t ON a.AlbumId = t.AlbumId
+GROUP BY artist
+ORDER BY albums DESC;
